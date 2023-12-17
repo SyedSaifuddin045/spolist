@@ -11,7 +11,7 @@ export interface Token {
     access_token: string;
     refresh_token: string;
     expires_in: number;
-    expiry_date:Date
+    expiry_date: Date
 }
 
 export interface SpotifyContextProps {
@@ -19,6 +19,7 @@ export interface SpotifyContextProps {
     token: Token | null;
     login: (response: Token) => void;
     logout: () => void;
-    setUser : (user:UserProfile | null) => void;
-    setToken : (token:Token | null) => void
+    setUser: (user: UserProfile | null) => void;
+    setToken: (token: Token | null) => void
+    isTokenRetrieved: boolean | null
 }

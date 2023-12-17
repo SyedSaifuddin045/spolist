@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { TokenManager, useSpotifyContext } from '../context/SpotifyContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Token } from '../types/types';
@@ -13,22 +13,22 @@ export default function Home() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (!searchParams.has('code')) {
+    if (!searchParams.has('code') && spotifyContext.isTokenRetrieved != null) {
       HF();
     }
-  }, []);
+  }, [spotifyContext.isTokenRetrieved]);
 
   useEffect(() => {
     const abortController = new AbortController();
     Code();
-    return ()=>abortController.abort();
+    return () => abortController.abort();
   }, [])
 
   async function Code() {
     if (searchParams.has('code')) {
       const queryCode = searchParams.get('code') as string;
       if (queryCode != "") {
-        console.log("Query Code : "+queryCode);
+        console.log("Query Code : " + queryCode);
         if (!spotifyContext.token && queryCode) {
           const tkn: Token = await getAccessToken(clientId, queryCode);
           console.log("Token from code : " + tkn?.access_token);
@@ -41,13 +41,12 @@ export default function Home() {
   }
 
   async function HF() {
-    if (spotifyContext.token) 
-    {
-      console.log("Token on Start" + spotifyContext.token);
+    if (spotifyContext.token) {
       router.push('/user');
     }
     else {
       console.log("No Token found in context");
+      if(spotifyContext.isTokenRetrieved == false)
       redirectToAuthCodeFlow(clientId);
     }
   }
@@ -127,38 +126,38 @@ export default function Home() {
       .replace(/=+$/, '');
   }
 
-  // async function refreshToken(token: Token): Promise<Token> {
-  //   const url = "https://accounts.spotify.com/api/token"
-  //   const b = new URLSearchParams();
-  //   b.append("grant_type", 'refresh_token');
-  //   b.append("refresh_token", token.refresh_token);
-  //   b.append("client_id", clientId);
+  async function refreshToken(token: Token): Promise<Token> {
+    const url = "https://accounts.spotify.com/api/token"
+    const b = new URLSearchParams();
+    b.append("grant_type", 'refresh_token');
+    b.append("refresh_token", token.refresh_token);
+    b.append("client_id", clientId);
 
-  //   const payload = {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/x-www-form-urlencoded'
-  //     },
-  //     body: b,
-  //   };
+    const payload = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: b,
+    };
 
-  //   try {
-  //     const response = await fetch(url, payload);
+    try {
+      const response = await fetch(url, payload);
 
-  //     if (response.ok) {
-  //       const refreshedToken: Token = await response.json();
-  //       return refreshedToken;
-  //     } else {
-  //       // Handle the case where the refresh token request fails
-  //       console.error('Failed to refresh token:', response.status, response.statusText);
-  //       throw new Error('Failed to refresh token');
-  //     }
-  //   } catch (error) {
-  //     // Handle any fetch errors
-  //     console.error('Error refreshing token:', error);
-  //     throw new Error('Error refreshing token');
-  //   }
-  // }
+      if (response.ok) {
+        const refreshedToken: Token = await response.json();
+        return refreshedToken;
+      } else {
+        // Handle the case where the refresh token request fails
+        console.error('Failed to refresh token:', response.status, response.statusText);
+        throw new Error('Failed to refresh token');
+      }
+    } catch (error) {
+      // Handle any fetch errors
+      console.error('Error refreshing token:', error);
+      throw new Error('Error refreshing token');
+    }
+  }
 
   async function getAccessToken(clientId: string, code: string): Promise<Token> {
     const verifier = localStorage.getItem("verifier");

@@ -63,33 +63,42 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
     const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
     const [user, setUser] = useState<UserProfile | null>(null);
     const [token, setToken] = useState<Token | null>(null);
+    const [isTokenRetrieved, setTokenRetrieved] = useState<boolean | null>(null);
 
     useEffect(() => {
         // Retrieve token from localStorage when the component mounts
         const storedToken = TokenManager.retrieve();
-        if (storedToken && new Date() < new Date(storedToken.expiry_date)) {
-            setToken(storedToken);
-        } else {
-            console.log("Token Exprired Tyring to Refresh");
-            // Token is either not stored or expired, handle accordingly
-            handleTokenExpired();
+        console.log(storedToken);
+        if (storedToken) {
+            if (new Date() < new Date(storedToken.expiry_date)) {
+                setTokenContext(storedToken);
+            } else {
+                console.log("Token Exprired Tyring to Refresh");
+                // Token is either not stored or expired, handle accordingly
+                handleTokenExpired(storedToken);
+            }
+        }
+        else if (!storedToken) {
+            setTokenRetrieved(false);
         }
     }, []);
 
-    const handleTokenExpired = async () => {
-        if (token) {
+    const handleTokenExpired = async (expiredToken : Token) => {
+        if (expiredToken) {
             try {
                 // Token is invalid, Refresh it
-                const refreshedToken = await TokenManager.refresh(token, clientId);
-                setToken(refreshedToken);
+                const refreshedToken = await TokenManager.refresh(expiredToken, clientId);
+                setTokenContext(refreshedToken);
             } catch (error) {
                 console.error("Failed to Refresh Token");
                 // Error refreshing token, set to null or handle appropriately
                 setToken(null);
+                setTokenRetrieved(false);
             }
         } else {
             // Token is not stored, set to null or handle appropriately
             setToken(null);
+            setTokenRetrieved(false);
         }
     };
 
@@ -109,6 +118,10 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
 
     const setTokenContext = (newToken: Token | null) => {
         setToken(newToken);
+        if (newToken != null) {
+            setTokenRetrieved(true);
+            console.log("Setting token Retrieved to true");
+        }
     }
 
     const contextValue: SpotifyContextProps = {
@@ -118,6 +131,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         logout,
         setUser: setUserContext,
         setToken: setTokenContext,
+        isTokenRetrieved
     };
 
     return <SpotifyContext.Provider value={contextValue}>{children}</SpotifyContext.Provider>;
