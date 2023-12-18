@@ -18,22 +18,15 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
     } = userProfile;
 
     return (
-        <div>
-            <h1>User Profile</h1>
-            <p>Display Name: {display_name}</p>
-            <p>ID: {id}</p>
-            <p>Email: {email}</p>
-            <p>URI: {uri}</p>
-            <p>URL: {url}</p>
-
-            <h2>Images</h2>
-            <ul>
-                {images.map((image, index) => (
-                    <img key={index} src={image}></img>
-                ))}
-            </ul>
-
+        <div className="flex items-center">
+            <div className="mask rounded-full overflow-hidden w-16 h-16 ml-4">
+                <img className="w-full h-full object-cover" src={images[1]} alt="Your Image" />
+            </div>
+            <div className="bg-accent text-primary inline-block px-4 py-2 rounded-full">
+                <p>{display_name}</p>
+            </div>
         </div>
+
     );
 };
 

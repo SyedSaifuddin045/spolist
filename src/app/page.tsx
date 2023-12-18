@@ -19,9 +19,7 @@ export default function Home() {
   }, [spotifyContext.isTokenRetrieved]);
 
   useEffect(() => {
-    const abortController = new AbortController();
     Code();
-    return () => abortController.abort();
   }, [])
 
   async function Code() {
@@ -41,12 +39,12 @@ export default function Home() {
   }
 
   async function HF() {
-    if (spotifyContext.token) {
+    if (spotifyContext.token && spotifyContext.isTokenRetrieved == true) {
       router.push('/user');
     }
     else {
-      console.log("No Token found in context");
-      if(spotifyContext.isTokenRetrieved == false)
+      if (spotifyContext.isTokenRetrieved == false)
+        console.log("No Token found in context");
       redirectToAuthCodeFlow(clientId);
     }
   }

@@ -73,7 +73,6 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
             if (new Date() < new Date(storedToken.expiry_date)) {
                 setTokenContext(storedToken);
             } else {
-                console.log("Token Exprired Tyring to Refresh");
                 // Token is either not stored or expired, handle accordingly
                 handleTokenExpired(storedToken);
             }
@@ -83,12 +82,14 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         }
     }, []);
 
-    const handleTokenExpired = async (expiredToken : Token) => {
+    const handleTokenExpired = async (expiredToken: Token) => {
         if (expiredToken) {
             try {
-                // Token is invalid, Refresh it
+                console.log("Token Exprired Tyring to Refresh");
+                // Token is expired, Refresh it
                 const refreshedToken = await TokenManager.refresh(expiredToken, clientId);
                 setTokenContext(refreshedToken);
+                TokenManager.save(refreshedToken);
             } catch (error) {
                 console.error("Failed to Refresh Token");
                 // Error refreshing token, set to null or handle appropriately
@@ -120,7 +121,12 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         setToken(newToken);
         if (newToken != null) {
             setTokenRetrieved(true);
+            TokenManager.save(newToken);
             console.log("Setting token Retrieved to true");
+        }
+        else {
+            setTokenRetrieved(false);
+            console.log("Setting Token Retrieved to false");
         }
     }
 
