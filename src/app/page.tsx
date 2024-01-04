@@ -32,7 +32,7 @@ export default function Home() {
           console.log("Token from code : " + tkn?.access_token);
           spotifyContext.setToken(tkn);
           TokenManager.save(tkn);
-          router.push('/user');
+          router.push('/home');
         }
       }
     }
@@ -40,7 +40,7 @@ export default function Home() {
 
   async function HF() {
     if (spotifyContext.token && spotifyContext.isTokenRetrieved == true) {
-      router.push('/user');
+      router.push('/home');
     }
     else {
       if (spotifyContext.isTokenRetrieved == false)

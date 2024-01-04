@@ -9,7 +9,7 @@ import React from 'react';
 
 // ... other imports
 
-const UserProfilePage = () => {
+const UserHomePage = () => {
     const router = useRouter();
     const spotifyContext = useSpotifyContext();
     const [profile, setUserProfile] = useState<UserProfile | null>(spotifyContext.user || null);
@@ -67,4 +67,4 @@ const UserProfilePage = () => {
     );
 };
 
-export default UserProfilePage;
+export default UserHomePage;
