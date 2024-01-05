@@ -29,7 +29,7 @@ export default function Home() {
         console.log("Query Code : " + queryCode);
         if (!spotifyContext.token && queryCode) {
           const tkn: Token = await getAccessToken(clientId, queryCode);
-          console.log("Token from code : " + tkn?.access_token);
+          console.log("Token from code is : " + tkn?.access_token);
           spotifyContext.setToken(tkn);
           TokenManager.save(tkn);
           router.push('/home');

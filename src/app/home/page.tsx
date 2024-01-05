@@ -1,16 +1,13 @@
 'use client'
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Profile from '../../components/profile';
 import { useSpotifyContext } from '../../context/SpotifyContext';
 import { UserProfile } from '../../types/types';
 import React from 'react';
-
-// ... other imports
+import SearchBar from '@/src/components/searchbar';
 
 const UserHomePage = () => {
-    const router = useRouter();
     const spotifyContext = useSpotifyContext();
     const [profile, setUserProfile] = useState<UserProfile | null>(spotifyContext.user || null);
 
@@ -57,12 +54,18 @@ const UserHomePage = () => {
     }
 
     return (
-        <div>
+        <div className="flex bg-base-200">
+            {/* Display the Profile component if a profile is available, otherwise show "Loading..." */}
             {profile ? (
                 <Profile userProfile={profile} />
             ) : (
                 <div>Loading...</div>
             )}
+
+            {/* Display the SearchBar component and pass handleSearch as a prop */}
+            <div className='flex-grow'>
+                <SearchBar />
+            </div>
         </div>
     );
 };
