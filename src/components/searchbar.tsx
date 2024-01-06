@@ -1,21 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { useSpotifyContext } from '../context/SpotifyContext';
-
-interface SearchResult {
-    id: string;
-    name: string;
-    artists: Array<{ name: string }>;
-    album: {
-        name: string;
-        images: Array<{ url: string }>;
-    };
-}
+import styles from '../common/styles/global.module.css';
+import { Song } from '../types/types';
 
 const SearchBar: React.FC = () => {
     const spotifyContext = useSpotifyContext();
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [searchResults, setSearchResults] = useState<Song[]>([]);
     const [isInputFocused, setIsInputFocused] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -58,6 +50,11 @@ const SearchBar: React.FC = () => {
         setIsInputFocused(false);
     };
 
+    const setSong = (clickedResult: Song) => {
+        spotifyContext.setCurrentSong(clickedResult);
+        console.log("New song name : "+clickedResult.name);
+    };
+
     return (
         <div className='flex font-light p-4 relative items-center'>
             <input
@@ -71,15 +68,15 @@ const SearchBar: React.FC = () => {
                 ref={inputRef}
             />
             <FaSearch
-                className='cursor-pointer transition ease-out duration-200'
+                className={`cursor-pointer ${styles['search-hover-scale']}`}
                 onClick={handleSearch}
             />
 
             {isInputFocused && searchResults.length > 0 && (
-                <div className='absolute top-full left-0 right-0 bg-accent shadow-md p-4 overflow-y-auto max-h-80 rounded-box'>
+                <div className='absolute top-full left-0 right-0 bg-accent shadow-md p-8 overflow-y-auto max-h-80 rounded-box'>
                     <ul className="space-y-4">
                         {searchResults.map((result) => (
-                            <li key={result.id} className="flex items-center bg-lime-400 rounded-box">
+                            <li key={result.id} onMouseDown={() => setSong(result)} className={`flex items-center bg-lime-400 rounded-box ${styles['hover-scale']}`}>
                                 <img src={result.album.images[0].url} alt={result.name} className="w-16 h-16 object-cover mr-4 m-4 rounded-md" />
                                 <div>
                                     <h3 className="text-lg font-semibold">{result.name}</h3>

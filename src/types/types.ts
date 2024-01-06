@@ -13,13 +13,24 @@ export interface Token {
     expires_in: number;
     expiry_date: Date
 }
+export interface Song {
+    id: string;
+    name: string;
+    artists: Array<{ name: string }>;
+    album: {
+        name: string;
+        images: Array<{ url: string }>;
+    };
+}
 
 export interface SpotifyContextProps {
     user: UserProfile | null;
     token: Token | null;
+    currentSong: Song | null;  // Added currentSong
+    setCurrentSong: (song: Song | null) => void;  // Added setCurrentSong
     login: (response: Token) => void;
     logout: () => void;
     setUser: (user: UserProfile | null) => void;
-    setToken: (token: Token | null) => void
-    isTokenRetrieved: boolean | null
+    setToken: (token: Token | null) => void;
+    isTokenRetrieved: boolean | null;
 }

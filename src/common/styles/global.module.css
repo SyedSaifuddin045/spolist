@@ -1,0 +1,18 @@
+.hover-scale {
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.1);
+    color: grey;
+  }
+
+  .search-hover-scale {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .search-hover-scale:hover{
+    transition-delay: 100ms;
+    transform:scale(1.25);
+    color: grey;
+  }

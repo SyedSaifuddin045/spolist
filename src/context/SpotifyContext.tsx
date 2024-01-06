@@ -1,6 +1,6 @@
 'use client'
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
-import { UserProfile, Token, SpotifyContextProps } from "../types/types";
+import { UserProfile, Token, SpotifyContextProps, Song } from "../types/types";
 
 const TokenManager = {
     save: function (response: Token) {
@@ -64,6 +64,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
     const [user, setUser] = useState<UserProfile | null>(null);
     const [token, setToken] = useState<Token | null>(null);
     const [isTokenRetrieved, setTokenRetrieved] = useState<boolean | null>(null);
+    const [currentSong, setCurrentSong] = useState<Song | null>(null);
 
     useEffect(() => {
         // Retrieve token from localStorage when the component mounts
@@ -137,7 +138,9 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         logout,
         setUser: setUserContext,
         setToken: setTokenContext,
-        isTokenRetrieved
+        isTokenRetrieved,
+        currentSong,
+        setCurrentSong
     };
 
     return <SpotifyContext.Provider value={contextValue}>{children}</SpotifyContext.Provider>;
