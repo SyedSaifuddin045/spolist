@@ -11,6 +11,7 @@ export interface Token {
     access_token: string;
     refresh_token: string;
     expires_in: number;
+    is_valid:boolean;
     expiry_date: Date
 }
 export interface Song {

@@ -13,6 +13,8 @@ const SearchBar: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!spotifyContext.token?.is_valid)
+                return;
             const access_token = spotifyContext.token?.access_token;
 
             if (searchQuery && access_token) {
@@ -52,7 +54,7 @@ const SearchBar: React.FC = () => {
 
     const setSong = (clickedResult: Song) => {
         spotifyContext.setCurrentSong(clickedResult);
-        console.log("New song name : "+clickedResult.name);
+        console.log("New song name : " + clickedResult.name);
     };
 
     return (

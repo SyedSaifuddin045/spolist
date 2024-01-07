@@ -13,6 +13,7 @@ const TokenManager = {
         const tokenString = localStorage.getItem('token');
         if (tokenString) {
             const token: Token = JSON.parse(tokenString);
+            token.is_valid = new Date() < new Date(token.expiry_date);
             return token;
         } else {
             return null;
@@ -72,6 +73,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         console.log(storedToken);
         if (storedToken) {
             if (new Date() < new Date(storedToken.expiry_date)) {
+                storedToken.is_valid = new Date() < new Date(storedToken.expiry_date);
                 setTokenContext(storedToken);
             } else {
                 // Token is either not stored or expired, handle accordingly
@@ -89,6 +91,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
                 console.log("Token Exprired Tyring to Refresh");
                 // Token is expired, Refresh it
                 const refreshedToken = await TokenManager.refresh(expiredToken, clientId);
+                refreshedToken.is_valid = new Date() < new Date(refreshedToken.expiry_date);
                 setTokenContext(refreshedToken);
                 TokenManager.save(refreshedToken);
             } catch (error) {
