@@ -6,9 +6,12 @@ import { useSpotifyContext } from '../../context/SpotifyContext';
 import { UserProfile } from '../../types/types';
 import React from 'react';
 import SearchBar from '@/src/components/searchbar';
+import { useRouter } from 'next/navigation';
+import AudioPlayer from '@/src/components/songplayer';
 
 const UserHomePage = () => {
     const spotifyContext = useSpotifyContext();
+    const router = useRouter();
     const [profile, setUserProfile] = useState<UserProfile | null>(spotifyContext.user || null);
 
     useEffect(() => {
@@ -25,6 +28,9 @@ const UserHomePage = () => {
                     } catch (error) {
                         console.error('Error fetching profile:', error);
                     }
+                }
+                else {
+                    router.push("/")
                 }
             }
         }
@@ -53,21 +59,31 @@ const UserHomePage = () => {
         return newProfile;
     }
 
-    return (
-        <div className="flex bg-base-200">
-            {/* Display the Profile component if a profile is available, otherwise show "Loading..." */}
-            {profile ? (
-                <Profile userProfile={profile} />
-            ) : (
-                <div>Loading...</div>
-            )}
+    const audioFilePath = "song.mp3";
 
-            {/* Display the SearchBar component and pass handleSearch as a prop */}
-            <div className='flex-grow'>
-                <SearchBar />
+    return (
+        <div className='h-screen bg-red-800'>
+            <div className="flex bg-base-200">
+                {/* Display the Profile component if a profile is available, otherwise show "Loading..." */}
+                {profile ? (
+                    <Profile userProfile={profile} />
+                ) : (
+                    <div>Loading...</div>
+                )}
+
+                {/* Display the SearchBar component and pass handleSearch as a prop */}
+                <div className='flex-grow'>
+                    <SearchBar />
+                </div>
+
+                {/* Add a container for the AudioPlayer with flex styling */}
+                <div className="flex items-center">
+                    <AudioPlayer src={audioFilePath} songName={spotifyContext.currentSong?.name} songArtist={spotifyContext.currentSong?.artists[0]?.name} />
+                </div>
             </div>
         </div>
     );
+
 };
 
 export default UserHomePage;
