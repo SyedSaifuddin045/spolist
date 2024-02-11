@@ -22,6 +22,9 @@ export interface Song {
         name: string;
         images: Array<{ url: string }>;
     };
+    external_urls:{
+        spotify:string
+    }
 }
 
 export interface SpotifyContextProps {

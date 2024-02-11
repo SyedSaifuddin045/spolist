@@ -26,6 +26,7 @@ const SearchBar: React.FC = () => {
                 try {
                     const search_response = await fetch(search_url, { headers });
                     const search_results = await search_response.json();
+                    console.log(search_results)
                     setSearchResults(search_results.tracks.items);
                 } catch (error) {
                     console.error('Error fetching search results:', error);
@@ -82,6 +83,7 @@ const SearchBar: React.FC = () => {
                                 <img src={result.album.images[0].url} alt={result.name} className="w-16 h-16 object-cover mr-4 m-4 rounded-md" />
                                 <div>
                                     <h3 className="text-lg font-semibold">{result.name}</h3>
+                                    <a>{result.external_urls.spotify}</a>
                                     <p className="text-sm text-gray-600">{result.artists.map((artist) => artist.name).join(', ')}</p>
                                     <p className="text-sm text-gray-600">{result.album.name}</p>
                                 </div>
