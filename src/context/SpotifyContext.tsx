@@ -1,4 +1,5 @@
 'use client'
+import axios from 'axios';
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { UserProfile, Token, SpotifyContextProps, Song } from "../types/types";
 
@@ -121,6 +122,55 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         setUser(newUser);
     };
 
+    const setCurrentSpotifySong = async (song: Song | null) => {
+        const downloadUrl = process.env.NEXT_PUBLIC_BACKEND_URL + `download_song?songID=${song?.id}`;
+        console.log("Backend URL : " + downloadUrl);
+
+        const requestBody = {
+            songID: song?.id || '',
+            songLink: song?.external_urls.spotify || '',
+        };
+
+        if (song == null) {
+            setCurrentSong(song);
+            return;
+        }
+
+        try {
+            const songDownloadResponse = await axios.post(downloadUrl, requestBody, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            console.log(songDownloadResponse);
+
+            if (songDownloadResponse.status === 200) {
+                console.log('Download request successful');
+                const getResponse = await axios.get(downloadUrl, {
+                    responseType: 'blob',
+                });
+
+                if (getResponse.status === 200) {
+                    console.log('GET request for song download successful');
+
+                    // Convert the response to a Blob
+                    const blob = new Blob([getResponse.data], { type: 'audio/mpeg' });
+
+                    // Create a Blob URL for the song
+                    const blobUrl = URL.createObjectURL(blob);
+                    song.song_path = blobUrl;
+                    setCurrentSong(song);
+                }
+            } else {
+                console.error('Download request failed:', songDownloadResponse.status, songDownloadResponse.statusText);
+            }
+        } catch (error) {
+            console.error('Error during download request:', error);
+        }
+    };
+
+
     const setTokenContext = (newToken: Token | null) => {
         setToken(newToken);
         if (newToken != null) {
@@ -143,7 +193,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         setToken: setTokenContext,
         isTokenRetrieved,
         currentSong,
-        setCurrentSong
+        setCurrentSong: setCurrentSpotifySong
     };
 
     return <SpotifyContext.Provider value={contextValue}>{children}</SpotifyContext.Provider>;

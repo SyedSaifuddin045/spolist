@@ -25,6 +25,7 @@ export interface Song {
     external_urls:{
         spotify:string
     }
+    song_path:string|null
 }
 
 export interface SpotifyContextProps {

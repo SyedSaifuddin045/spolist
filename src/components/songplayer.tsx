@@ -15,7 +15,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, songName, songArtist, on
   return (
     <H5AudioPlayer
       src={src}
-      autoPlay={false}
+      autoPlay={true}
       onPlay={onPlay}
       onPause={onPause}
       onSeeked={onSeek}

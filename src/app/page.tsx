@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { TokenManager, useSpotifyContext } from '../context/SpotifyContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Token } from '../types/types';

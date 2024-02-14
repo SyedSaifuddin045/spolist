@@ -78,7 +78,13 @@ const UserHomePage = () => {
 
                 {/* Add a container for the AudioPlayer with flex styling */}
                 <div className="flex items-center">
-                    <AudioPlayer src={audioFilePath} songName={spotifyContext.currentSong?.name} songArtist={spotifyContext.currentSong?.artists[0]?.name} />
+                    {spotifyContext.currentSong?.song_path && (
+                        <AudioPlayer
+                            src={spotifyContext.currentSong.song_path}
+                            songName={spotifyContext.currentSong?.name}
+                            songArtist={spotifyContext.currentSong?.artists[0]?.name}
+                        />
+                    )}
                 </div>
             </div>
         </div>
