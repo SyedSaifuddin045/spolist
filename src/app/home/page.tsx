@@ -8,6 +8,7 @@ import React from 'react';
 import SearchBar from '@/src/components/searchbar';
 import { useRouter } from 'next/navigation';
 import AudioPlayer from '@/src/components/songplayer';
+import Loader from '@/src/components/Loader';
 
 const UserHomePage = () => {
     const spotifyContext = useSpotifyContext();
