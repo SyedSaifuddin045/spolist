@@ -8,7 +8,6 @@ import React from 'react';
 import SearchBar from '@/src/components/searchbar';
 import { useRouter } from 'next/navigation';
 import AudioPlayer from '@/src/components/songplayer';
-import Loader from '@/src/components/Loader';
 
 const UserHomePage = () => {
     const spotifyContext = useSpotifyContext();
@@ -76,13 +75,7 @@ const UserHomePage = () => {
                 <div className='flex-grow'>
                     <SearchBar />
                 </div>
-                {
-                    spotifyContext.songIsBeingDownloaded ?
-                        <div className="flex flex-col items-center justify-center">
-                            <Loader songName={spotifyContext.currentSong?.name}></Loader>
-                        </div>
-                        : null
-                }
+
                 {/* Add a container for the AudioPlayer with flex styling */}
                 <div className="flex items-center">
                     {spotifyContext.currentSong?.song_path && (
@@ -96,6 +89,7 @@ const UserHomePage = () => {
             </div>
         </div>
     );
+
 
 };
 
