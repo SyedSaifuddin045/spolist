@@ -75,7 +75,7 @@ const SearchBar: React.FC = () => {
             />
 
             {isInputFocused && searchResults.length > 0 && (
-                <div className='absolute top-full left-0 right-0 bg-accent shadow-md p-8 overflow-y-auto max-h-80 rounded-box'>
+                <div className='absolute top-full left-0 right-0 bg-accent shadow-md p-8 overflow-y-auto max-h-80 rounded-box z-10'>
                     <ul className="space-y-4">
                         {searchResults.map((result) => (
                             <li key={result.id} onMouseDown={() => setSong(result)} className={`flex items-center bg-lime-400 rounded-box ${styles['hover-scale']}`}>

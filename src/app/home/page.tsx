@@ -64,7 +64,7 @@ const UserHomePage = () => {
     }
 
     return (
-        <div className='h-screen bg-red-800'>
+        <div className='h-screen flex flex-col bg-red-800'>
             <div className="flex bg-base-200">
                 {/* Display the Profile component if a profile is available, otherwise show "Loading..." */}
                 {profile ? (
@@ -79,13 +79,12 @@ const UserHomePage = () => {
                 </div>
 
             </div>
-            <div className="flex justify-center items-center h-fit">
-                <div className="items-center justify-center">
+            <div className="flex-grow flex justify-center items-center">
+                <div className="text-center" style={{ width: '100%', height: '100%' }}>
                     {spotifyContext.songIsBeingDownloaded ?
                         (<Loader songName={spotifyContext.currentSong?.name} />) : (<Three />)}
                 </div>
             </div>
-
 
             {/* Position the AudioPlayer outside the red div */}
             <div className="absolute bottom-0 left-0 right-0">
