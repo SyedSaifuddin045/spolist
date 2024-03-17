@@ -33,7 +33,7 @@ const SearchBar: React.FC = () => {
                 }
             }
         };
-
+        console.log("UseEffect from searchbar")
         fetchData();
     }, [searchQuery, spotifyContext.token]);
 
@@ -55,7 +55,6 @@ const SearchBar: React.FC = () => {
 
     const setSong = (clickedResult: Song) => {
         spotifyContext.setCurrentSong(clickedResult);
-        console.log("New song name : " + clickedResult.name);
     };
 
     return (

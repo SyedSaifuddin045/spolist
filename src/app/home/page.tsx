@@ -8,6 +8,7 @@ import React from 'react';
 import SearchBar from '@/src/components/searchbar';
 import { useRouter } from 'next/navigation';
 import AudioPlayer from '@/src/components/songplayer';
+import Loader from '@/src/components/Loader';
 
 const UserHomePage = () => {
     const spotifyContext = useSpotifyContext();
@@ -16,17 +17,19 @@ const UserHomePage = () => {
 
     useEffect(() => {
         async function fetchData() {
-            if (profile == null) {
-                const token = spotifyContext?.token?.access_token;
-                console.log(token)
-                if (token) {
-                    try {
-                        const fetchedProfile = await fetchProfile(token);
-                        console.log(fetchedProfile)
-                        setUserProfile(fetchedProfile);
-                        spotifyContext.setUser(fetchedProfile);
-                    } catch (error) {
-                        console.error('Error fetching profile:', error);
+            if (spotifyContext.token?.is_valid) {
+                if (profile == null) {
+                    const token = spotifyContext?.token?.access_token;
+                    console.log(token)
+                    if (token) {
+                        try {
+                            const fetchedProfile = await fetchProfile(token);
+                            console.log(fetchedProfile)
+                            setUserProfile(fetchedProfile);
+                            spotifyContext.setUser(fetchedProfile);
+                        } catch (error) {
+                            console.error('Error fetching profile:', error);
+                        }
                     }
                 }
                 else {
@@ -59,8 +62,6 @@ const UserHomePage = () => {
         return newProfile;
     }
 
-    const audioFilePath = "song.mp3";
-
     return (
         <div className='h-screen bg-red-800'>
             <div className="flex bg-base-200">
@@ -75,7 +76,13 @@ const UserHomePage = () => {
                 <div className='flex-grow'>
                     <SearchBar />
                 </div>
-
+                {
+                    spotifyContext.songIsBeingDownloaded ?
+                        <div className="flex flex-col items-center justify-center">
+                            <Loader songName={spotifyContext.currentSong?.name}></Loader>
+                        </div>
+                        : null
+                }
                 {/* Add a container for the AudioPlayer with flex styling */}
                 <div className="flex items-center">
                     {spotifyContext.currentSong?.song_path && (

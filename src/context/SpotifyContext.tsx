@@ -67,6 +67,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
     const [token, setToken] = useState<Token | null>(null);
     const [isTokenRetrieved, setTokenRetrieved] = useState<boolean | null>(null);
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
+    const [songIsBeingDownloaded,setSongIsBeingDownloaded] = useState<boolean>(false);
 
     useEffect(() => {
         // Retrieve token from localStorage when the component mounts
@@ -123,6 +124,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
     };
 
     const setCurrentSpotifySong = async (song: Song | null) => {
+        setCurrentSong(song);
         const downloadUrl = process.env.NEXT_PUBLIC_BACKEND_URL + `download_song?songID=${song?.id}`;
         console.log("Backend URL : " + downloadUrl);
 
@@ -135,6 +137,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
             setCurrentSong(song);
             return;
         }
+        setSongIsBeingDownloaded(true);
 
         try {
             const songDownloadResponse = await axios.post(downloadUrl, requestBody, {
@@ -161,6 +164,7 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
                     const blobUrl = URL.createObjectURL(blob);
                     song.song_path = blobUrl;
                     setCurrentSong(song);
+                    setSongIsBeingDownloaded(false);
                 }
             } else {
                 console.error('Download request failed:', songDownloadResponse.status, songDownloadResponse.statusText);
@@ -193,7 +197,8 @@ const SpotifyContextProvider: React.FC<SpotifyContextProviderProps> = ({ childre
         setToken: setTokenContext,
         isTokenRetrieved,
         currentSong,
-        setCurrentSong: setCurrentSpotifySong
+        setCurrentSong: setCurrentSpotifySong,
+        songIsBeingDownloaded
     };
 
     return <SpotifyContext.Provider value={contextValue}>{children}</SpotifyContext.Provider>;

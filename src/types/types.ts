@@ -38,4 +38,5 @@ export interface SpotifyContextProps {
     setUser: (user: UserProfile | null) => void;
     setToken: (token: Token | null) => void;
     isTokenRetrieved: boolean | null;
+    songIsBeingDownloaded:boolean;
 }
