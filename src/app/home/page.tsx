@@ -9,6 +9,7 @@ import SearchBar from '@/src/components/searchbar';
 import { useRouter } from 'next/navigation';
 import AudioPlayer from '@/src/components/songplayer';
 import Loader from '@/src/components/Loader';
+import Three from '@/src/components/Three';
 
 const UserHomePage = () => {
     const spotifyContext = useSpotifyContext();
@@ -78,13 +79,13 @@ const UserHomePage = () => {
                 </div>
 
             </div>
-            {spotifyContext.songIsBeingDownloaded && (
-                <div className="flex justify-center items-center h-full">
-                    <div className="flex flex-col items-center justify-center">
-                        <Loader songName={spotifyContext.currentSong?.name} />
-                    </div>
+            <div className="flex justify-center items-center h-fit">
+                <div className="items-center justify-center">
+                    {spotifyContext.songIsBeingDownloaded ?
+                        (<Loader songName={spotifyContext.currentSong?.name} />) : (<Three />)}
                 </div>
-            )}
+            </div>
+
 
             {/* Position the AudioPlayer outside the red div */}
             <div className="absolute bottom-0 left-0 right-0">
