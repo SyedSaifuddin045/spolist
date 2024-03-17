@@ -76,16 +76,24 @@ const UserHomePage = () => {
                     <SearchBar />
                 </div>
 
-                {/* Add a container for the AudioPlayer with flex styling */}
-                <div className="flex items-center">
-                    {spotifyContext.currentSong?.song_path && (
-                        <AudioPlayer
-                            src={spotifyContext.currentSong.song_path}
-                            songName={spotifyContext.currentSong?.name}
-                            songArtist={spotifyContext.currentSong?.artists[0]?.name}
-                        />
-                    )}
+            </div>
+            {spotifyContext.songIsBeingDownloaded && (
+                <div className="flex justify-center items-center h-full">
+                    <div className="flex flex-col items-center justify-center">
+                        <Loader songName={spotifyContext.currentSong?.name} />
+                    </div>
                 </div>
+            )}
+
+            {/* Position the AudioPlayer outside the red div */}
+            <div className="absolute bottom-0 left-0 right-0">
+                {spotifyContext.currentSong?.song_path && (
+                    <AudioPlayer
+                        src={spotifyContext.currentSong.song_path}
+                        songName={spotifyContext.currentSong?.name}
+                        songArtist={spotifyContext.currentSong?.artists[0]?.name}
+                    />
+                )}
             </div>
         </div>
     );
