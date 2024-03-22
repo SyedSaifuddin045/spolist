@@ -1,13 +1,12 @@
 'use client'
-
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Profile from '../../components/profile';
 import { useSpotifyContext } from '../../context/SpotifyContext';
 import { UserProfile } from '../../types/types';
 import React from 'react';
 import SearchBar from '@/src/components/searchbar';
 import { useRouter } from 'next/navigation';
-import AudioPlayer from '@/src/components/songplayer';
+import AudioPlayer, { AudioPlayerRef } from '@/src/components/songplayer';
 import Loader from '@/src/components/Loader';
 import Three from '@/src/components/Three';
 
@@ -15,6 +14,8 @@ const UserHomePage = () => {
     const spotifyContext = useSpotifyContext();
     const router = useRouter();
     const [profile, setUserProfile] = useState<UserProfile | null>(spotifyContext.user || null);
+    const [audioRefChanged, setAudioRefChanged] = useState<boolean>(false);
+    const h5audioRef = useRef<AudioPlayerRef | null>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -41,6 +42,12 @@ const UserHomePage = () => {
 
         fetchData();
     }, [spotifyContext.token]);
+
+    useEffect(() => {
+        console.log("h5 AudioRef useEffect", h5audioRef.current?.audio?.localName);
+        // Set the state to trigger rerender whenever h5audioRef changes
+        setAudioRefChanged(prevState => !prevState);
+    }, [h5audioRef.current?.audio, spotifyContext.songIsBeingDownloaded])
 
     async function fetchProfile(token: string): Promise<UserProfile> {
         const result = await fetch("https://api.spotify.com/v1/me", {
@@ -77,19 +84,23 @@ const UserHomePage = () => {
                 <div className='flex-grow'>
                     <SearchBar />
                 </div>
-
             </div>
             <div className="flex-grow flex justify-center items-center">
                 <div className="text-center" style={{ width: '100%', height: '100%' }}>
-                    {spotifyContext.songIsBeingDownloaded ?
-                        (<Loader songName={spotifyContext.currentSong?.name} />) : (<Three />)}
+                    {spotifyContext.songIsBeingDownloaded ? (
+                        <Loader songName={spotifyContext.currentSong?.name} />
+                    ) : (
+                        h5audioRef.current?.audio && (
+                            <Three key={audioRefChanged ? '1' : '0'} audioElement={h5audioRef.current.audio} />
+                        )
+                    )}
                 </div>
             </div>
-
             {/* Position the AudioPlayer outside the red div */}
-            <div className="absolute bottom-0 left-0 right-0">
+            <div className="absolute bottom-0 left-0 right-0 z-10">
                 {spotifyContext.currentSong?.song_path && (
                     <AudioPlayer
+                        ref={h5audioRef}
                         src={spotifyContext.currentSong.song_path}
                         songName={spotifyContext.currentSong?.name}
                         songArtist={spotifyContext.currentSong?.artists[0]?.name}
@@ -98,8 +109,6 @@ const UserHomePage = () => {
             </div>
         </div>
     );
-
-
 };
 
 export default UserHomePage;
