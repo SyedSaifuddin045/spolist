@@ -1,30 +1,99 @@
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import React, { useEffect, useRef, useState } from 'react';
+import { time } from 'console';
 
 interface ThreeProps {
   audioElement: HTMLAudioElement | null;
 }
 
 const Three: React.FC<ThreeProps> = ({ audioElement }) => {
-  const vertexShader = `
+  const vertexShaderPerlinNoise = `
+  uniform float audioData[128]; // Audio data uniform
+
+varying vec3 vNormal;
+varying vec2 vUv;
+
+// Implementation of 2D Perlin noise function
+float random(vec2 st){
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+float noise(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    // Four corner values
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    // Smooth interpolation
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) +
+           (c - a) * u.y * (1.0 - u.x) +
+           (d - b) * u.x * u.y;
+}
+
+// Implementation of 2D fractal noise
+float fractalNoise(vec2 st, int octaves, float persistence) {
+    float value = 0.0;
+    float amplitude = 1.0;
+
+    for (int i = 0; i < octaves; i++) {
+        value += noise(st) * amplitude;
+        st *= 2.0;
+        amplitude *= persistence;
+    }
+
+    return value;
+}
+
+uniform float time; // Time variable
+
+void main() {
+    // Get the UV coordinates of the vertex
+    vUv = uv;
+
+    // Scale and offset UV coordinates if necessary
+    // Example: vec2 st = uv * scale + offset;
+
+    // Calculate Perlin noise value for displacement
+    float perlinValue = fractalNoise(uv + sin(time) * 0.1, 4, 0.5); // Adjust octaves and persistence as needed
+
+    // Calculate displacement amount based on audio data
+    float audioDisplacement = audioData[gl_VertexID % 128] * 0.003; // Adjust multiplier as needed
+
+    // Displace the vertex position based on Perlin noise and audio data
+    vec3 newPosition = position + normal * (perlinValue * audioDisplacement);
+
+    // Update vertex position
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+
+    // Pass normal to fragment shader
+    vNormal = normal;
+}
+  `;
+  const vertexShaderAverage=`
   varying vec3 vNormal;
 uniform float audioData[128];
-float displacementScale = 0.01; // Scale factor for displacement
+float displacementScale = 0.02; // Scale factor for displacement
 
 void main() {
     vNormal = normal;
     
-    // Get the index within the valid range of the audio data array
-    int index = int(mod(float(gl_VertexID), 128.0));
+    // Calculate the average audio data value
+    float sum = 0.0;
+    for (int i = 0; i < 128; i++) {
+        sum += audioData[i];
+    }
+    float averageAudioValue = sum / 128.0;
     
-    // Retrieve the audio data for the current vertex
-    float audioValue = audioData[index];
+    // Calculate displacement amount based on the average audio data value
+    float displacementAmount = averageAudioValue * displacementScale;
     
-    // Calculate displacement amount based on audio data
-    float displacementAmount = audioValue * displacementScale;
-    
-    // Displace the vertex position along all axes based on its normal
+    // Displace the vertex position along all axes based on the normal
     vec3 newPosition = position + vNormal * displacementAmount;
     
     gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
@@ -35,14 +104,7 @@ void main() {
   varying vec3 vNormal;
 
 void main() {
-    // Get the height (y-coordinate) of the vertex
-    float height = vNormal.y;
-
-    // Map the height to a color
-    vec3 color = vec3(height, 0.0, 1.0 - height); // Blue to red gradient
-
-    // Output the color
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(vNormal, 1.0);
 }
 
 `;
@@ -56,13 +118,17 @@ void main() {
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null); // State for the canvas element
   const mousePosition = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
   const [material, setMaterial] = useState<THREE.ShaderMaterial | null>(null);
+  const clock = new THREE.Clock() 
 
   useEffect(() => {
     const newMaterial = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
+      vertexShader: vertexShaderAverage,
+      fragmentShader : fragmentShader,
+      wireframe:true,
+      wireframeLinewidth : 0.2,
       uniforms: {
-        audioData: { value: audioData ? audioData : new Float32Array(256).fill(0) },
+        audioData: { value: audioData ? audioData : new Float32Array(128).fill(0) },
+        time : {value:0},
         colorA: { value: new THREE.Color(0xff0000) },
         colorB: { value: new THREE.Color(0x0000ff) },
       },
@@ -73,7 +139,7 @@ void main() {
     return () => {
       newMaterial.dispose();
     };
-  }, [audioData, vertexShader, fragmentShader]);
+  }, [audioData, vertexShaderPerlinNoise, fragmentShader]);
 
   const randomDirection = () => {
     const randomVector = new THREE.Vector3(
@@ -140,6 +206,7 @@ void main() {
         // Update the audioData uniform
         if (material) {
           material.uniforms.audioData.value = float32Array;
+          material.uniforms.time.value = clock.getElapsedTime()
         }
 
         console.log("Audio data:", dataArray);
