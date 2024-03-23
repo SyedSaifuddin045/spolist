@@ -41,6 +41,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = React.forwardRef(
             <h3 className="flex-shrink-0">{songArtist}</h3>
           </div>,
         ]}
+        volume={0.5}
         className="fixed bottom-0 left-0 w-full bg-gray-200 shadow-md rounded-t-md p-4"
       />
     );

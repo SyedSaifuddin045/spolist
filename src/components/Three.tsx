@@ -7,7 +7,46 @@ interface ThreeProps {
 }
 
 const Three: React.FC<ThreeProps> = ({ audioElement }) => {
-  const [audioData, setAudioData] = useState<Uint8Array | null>(null);
+  const vertexShader = `
+  varying vec3 vNormal;
+uniform float audioData[128];
+float displacementScale = 0.01; // Scale factor for displacement
+
+void main() {
+    vNormal = normal;
+    
+    // Get the index within the valid range of the audio data array
+    int index = int(mod(float(gl_VertexID), 128.0));
+    
+    // Retrieve the audio data for the current vertex
+    float audioValue = audioData[index];
+    
+    // Calculate displacement amount based on audio data
+    float displacementAmount = audioValue * displacementScale;
+    
+    // Displace the vertex position along all axes based on its normal
+    vec3 newPosition = position + vNormal * displacementAmount;
+    
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+}
+  `;
+
+  const fragmentShader = `
+  varying vec3 vNormal;
+
+void main() {
+    // Get the height (y-coordinate) of the vertex
+    float height = vNormal.y;
+
+    // Map the height to a color
+    vec3 color = vec3(height, 0.0, 1.0 - height); // Blue to red gradient
+
+    // Output the color
+    gl_FragColor = vec4(color, 1.0);
+}
+
+`;
+  const [audioData, setAudioData] = useState<Float32Array | null>(null);
   const meshRef = useRef<THREE.Mesh>(null);
   const [rotationSpeed, setRotationSpeed] = useState<number>(0.03);
   const [listener, setListener] = useState<THREE.AudioListener | null>(null);
@@ -16,6 +55,25 @@ const Three: React.FC<ThreeProps> = ({ audioElement }) => {
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null); // State for the canvas element
   const mousePosition = useRef<{ clientX: number; clientY: number }>({ clientX: 0, clientY: 0 });
+  const [material, setMaterial] = useState<THREE.ShaderMaterial | null>(null);
+
+  useEffect(() => {
+    const newMaterial = new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader,
+      uniforms: {
+        audioData: { value: audioData ? audioData : new Float32Array(256).fill(0) },
+        colorA: { value: new THREE.Color(0xff0000) },
+        colorB: { value: new THREE.Color(0x0000ff) },
+      },
+    });
+
+    setMaterial(newMaterial);
+
+    return () => {
+      newMaterial.dispose();
+    };
+  }, [audioData, vertexShader, fragmentShader]);
 
   const randomDirection = () => {
     const randomVector = new THREE.Vector3(
@@ -76,7 +134,14 @@ const Three: React.FC<ThreeProps> = ({ audioElement }) => {
     if (analyser) {
       try {
         const dataArray = analyser.getFrequencyData();
-        setAudioData(dataArray);
+        const float32Array = new Float32Array(dataArray); // Convert Uint8Array to Float32Array
+        setAudioData(float32Array);
+
+        // Update the audioData uniform
+        if (material) {
+          material.uniforms.audioData.value = float32Array;
+        }
+
         console.log("Audio data:", dataArray);
       } catch (error) {
         console.error("Error during audio analysis:", error);
@@ -168,8 +233,8 @@ const Three: React.FC<ThreeProps> = ({ audioElement }) => {
         <ambientLight intensity={1.0} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
         <mesh position={[0, 0, 0]} ref={meshRef}>
-          <icosahedronGeometry args={[5, 10]} />
-          <meshStandardMaterial wireframe={true} color="white" />
+          <icosahedronGeometry args={[4, 10]} />
+          {material && <primitive object={material} />}
         </mesh>
       </Canvas>
     </div>

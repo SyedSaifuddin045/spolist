@@ -12,6 +12,7 @@
     "@react-three/fiber": "^8.15.19",
     "axios": "^1.6.7",
     "daisyui": "^4.4.20",
+    "gsap": "^3.12.5",
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
